@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NMNV | Mighty Puppi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      background: #000;
+      color: #fff;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .canvas-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.65;
+      will-change: transform;
+    }
+    /* Navigation Toggle */
+    .nav-toggle {
+      display: none;
+      position: relative;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      z-index: 60;
+      cursor: pointer;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #3b82f6;
+      position: absolute;
+      left: 8px;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    .nav-toggle span:nth-child(1) {
+      top: 12px;
+    }
+    .nav-toggle span:nth-child(2) {
+      top: 18px;
+    }
+    .nav-toggle span:nth-child(3) {
+      top: 24px;
+    }
+    .nav-toggle.active span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 18px;
+      background: #ff3030;
+    }
+    .nav-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 18px;
+      background: #f72020;
+    }
+    .nav-menu {
+      transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .nav-menu a {
+      position: relative;
+      padding-bottom: 4px;
+      transition: all 0.3s ease;
+    }
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, #ef4444);
+      transition: width 0.3s ease;
+    }
+    .nav-menu a:hover::after {
+      width: 100%;
+    }
+    .nav-menu a:hover {
+      transform: translateY(-2px);
+      text-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+    }
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 80%;
+        max-width: 300px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        padding: 3rem 2rem;
+        z-index: 50;
+        box-shadow: -5px 0 15px rgba(59, 130, 246, 0.3);
+        border-left: 1px solid #3b82f6;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transform: translateX(0);
+      }
+      .nav-menu.active {
+        transform: translateX(-100%);
+      }
+      .nav-menu li {
+        margin: 1.5rem 0;
+      }
+      .nav-menu a {
+        font-size: 1.5rem;
+        display: block;
+      }
+    }
+    @media (min-width: 769px) {
+      .nav-toggle {
+        display: none;
+      }
+      .nav-menu {
+        display: flex;
+        gap: 2.5rem;
+      }
+      .nav-menu li {
+        padding: 0;
+      }
+      .nav-menu a {
+        font-size: 1rem;
+      }
+    }
+    .social-icon {
+      transition: all 0.3s ease;
+      position: relative;
+      display: inline-block;
+    }
+    .social-icon:hover {
+      transform: scale(1.4) rotate(10deg);
+      color: #60a5fa;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(239, 68, 68, 0.6);
+    }
+    .social-icon.music-icon::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 40px;
+      height: 40px;
+      background: url('https://img.icons8.com/ios-filled/50/3b82f6/musical-notes.png') no-repeat center;
+      background-size: contain;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: -1;
+    }
+    .social-icon.music-icon:hover::before {
+      opacity: 0.7;
+      transform: rotate(20deg);
+    }
+    .social-icon::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.5), transparent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+      z-index: -1;
+    }
+    .social-icon:hover::after {
+      width: 40px;
+      height: 40px;
+    }
+    .section {
+      scroll-margin-top: 80px;
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1rem;
+    }
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: transparent;
+      border: 1px solid #3b82f6;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+      border-radius: 1rem;
+      overflow: hidden;
+      width: 100%;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+    }
+    .action-btn {
+      position: relative;
+      overflow: hidden;
+      background: #ff2727;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+      border-radius: 9999px;
+      transform: perspective(500px) rotateX(0deg);
+      transition: all 0.3s ease;
+    }
+    .action-btn:hover {
+      background: #f50707;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+      transform: perspective(500px) rotateX(5deg);
+    }
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+    .action-btn:hover::after {
+      left: 100%;
+    }
+    .text-glow-blue {
+      text-shadow: 0 0 12px rgba(59, 130, 246, 0.8), 0 0 25px rgba(59, 130, 246, 0.6);
+      color: #3b82f6;
+    }
+    .text-glow-red {
+      text-shadow: 0 0 12px rgba(243, 18, 18, 0.8), 0 0 25px rgba(239, 68, 68, 0.6);
+      color: #ef4444;
+    }
+    .text-color-mix {
+      background: linear-gradient(45deg, #3b82f6, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .section h2:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 15px rgba(59, 130, 246, 0.9), 0 0 30px rgba(239, 68, 68, 0.7);
+      transition: all 0.3s ease;
+    }
+    /* Enhanced About Story Styling */
+    .about-story {
+      position: relative;
+      padding: 2rem;
+      background: linear-gradient(145deg, rgba(59, 130, 246, 0.15), rgba(239, 68, 68, 0.15));
+      border-radius: 1.5rem;
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+      overflow: hidden;
+      display: grid;
+      gap: 1.5rem;
+    }
+    .about-story::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent);
+      animation: pulse 10s infinite;
+      z-index: -1;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.4); opacity: 0.3; }
+      100% { transform: scale(1); opacity: 0.5; }
+    }
+    .about-story p {
+      line-height: 1.9;
+      font-size: clamp(1rem, 2.5vw, 1.125rem);
+      color: #fff;
+      position: relative;
+      padding: 1.5rem;
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .about-story p:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    }
+    .about-story p:nth-child(1) {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+      border-left: 5px solid #3b82f6;
+    }
+    .about-story p:nth-child(2) {
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.1));
+      border-right: 5px solid #f03434;
+      text-align: right;
+    }
+    .about-story p:nth-child(3) {
+      background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(239, 68, 68, 0.1));
+      border: 3px dashed #3b82f6;
+      text-align: center;
+    }
+    .about-story p:nth-child(4) {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(239, 68, 68, 0.15));
+      position: relative;
+      overflow: hidden;
+    }
+    .about-story p:nth-child(4)::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+      animation: shine 3s infinite;
+    }
+    @keyframes shine {
+      0% { left: -100%; }
+      50% { left: 100%; }
+      100% { left: 100%; }
+    }
+    .about-story .highlight {
+      background: linear-gradient(45deg, #3b82f6, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+      text-shadow: none;
+    }
+    /* Time Zone Section Styling */
+    .timezone-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(239, 68, 68, 0.2));
+      border: 1px solid #3b82f6;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .timezone-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    }
+    .timezone-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(45deg, #3b82f6, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .timezone-card p {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    /* Music Section Image Styling */
+    .album-art-container {
+      width: 100%;
+      aspect-ratio: 1 / 1; /* Ensures square aspect ratio */
+      position: relative;
+      overflow: hidden;
+    }
+    .album-art-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Ensures full image fills container */
+      object-position: center;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+      display: block;
+    }
+    /* Audiomack Link Styling */
+    .audiomack-link {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #3b82f6, #ef4444);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 9999px;
+      margin-top: 1.5rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      animation: pulseGlow 2s infinite ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .audiomack-link:hover {
+      transform: scale(1.05) translateY(-3px);
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.9);
+      background: linear-gradient(90deg, #2563eb, #dc2626);
+    }
+    .audiomack-link::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+    .audiomack-link:hover::after {
+      left: 100%;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+      50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
+      100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+    }
+    /* Transparent Footer Styling */
+    footer {
+      padding: 1.5rem 1rem;
+      background: rgba(26, 26, 26, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(59, 130, 246, 0.3);
+      text-align: center;
+      font-size: clamp(0.75rem, 2vw, 0.875rem);
+      color: #a1a1aa;
+      position: relative;
+      z-index: 1;
+    }
+    footer p {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      letter-spacing: 1px;
+      background: linear-gradient(45deg, #3b82f6, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    /* Enhanced Responsiveness for All Devices */
+    @media (max-width: 1024px) {
+      .section {
+        padding: clamp(3rem, 8vw, 4rem) 1.5rem;
+      }
+      .text-7xl {
+        font-size: clamp(3rem, 10vw, 3.5rem);
+      }
+      .text-4xl {
+        font-size: clamp(1.75rem, 6vw, 2rem);
+      }
+      .text-xl {
+        font-size: clamp(1rem, 3vw, 1.125rem);
+      }
+      .card {
+        padding: 1rem;
+      }
+      .grid {
+        gap: clamp(0.5rem, 2vw, 1rem);
+      }
+      .about-story {
+        padding: 1.5rem;
+      }
+      .about-story p {
+        padding: 1rem;
+      }
+      .album-art-container {
+        aspect-ratio: 1 / 1;
+      }
+      .audiomack-link {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+    @media (max-width: 640px) {
+      .section {
+        padding: clamp(2rem, 6vw, 3rem) 0.5rem;
+      }
+      .text-5xl {
+        font-size: clamp(2rem, 8vw, 2.5rem);
+      }
+      .text-7xl {
+        font-size: clamp(2rem, 8vw, 2.5rem);
+      }
+      .text-4xl {
+        font-size: clamp(1.25rem, 5vw, 1.5rem);
+      }
+      .text-xl {
+        font-size: clamp(0.875rem, 2.5vw, 1rem);
+      }
+      .text-lg {
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+      }
+      .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+      .about-story p {
+        padding: 0.75rem !important;
+        text-align: left !important;
+        border-right: none !important;
+        border-left: 3px solid #3b82f6 !important;
+        background: rgba(59, 130, 246, 0.05) !important;
+        border-radius: 8px !important;
+      }
+      .about-story p:nth-child(3) {
+        border: 2px dashed #3b82f6 !important;
+        text-align: left !important;
+      }
+      .grid {
+        gap: clamp(0.25rem, 1.5vw, 0.5rem);
+      }
+      .social-icon {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        margin: 0 0.5rem;
+      }
+      .album-art-container {
+        aspect-ratio: 1 / 1;
+        width: 100%;
+      }
+      .card {
+        width: 100%;
+        margin: 0 auto;
+      }
+      .hero-section {
+        min-height: 80vh;
+        padding: 2rem 0.5rem;
+      }
+      .audiomack-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .section {
+        padding: clamp(1.5rem, 5vw, 2rem) 0.5rem;
+      }
+      .text-5xl {
+        font-size: clamp(1.75rem, 7vw, 2rem);
+      }
+      .text-7xl {
+        font-size: clamp(1.75rem, 7vw, 2rem);
+      }
+      .text-4xl {
+        font-size: clamp(1rem, 4vw, 1.25rem);
+      }
+      .text-xl {
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+      }
+      .album-art-container {
+        aspect-ratio: 1 / 1;
+      }
+      .audiomack-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+      }
+    }
+    @media (min-width: 1920px) {
+      .container {
+        max-width: 1400px;
+      }
+      .album-art-container {
+        aspect-ratio: 1 / 1;
+      }
+      .text-7xl {
+        font-size: 5rem;
+      }
+      .text-4xl {
+        font-size: 2.5rem;
+      }
+      .text-xl {
+        font-size: 1.5rem;
+      }
+      .audiomack-link {
+        padding: 1.25rem 2.5rem;
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+  <!-- Navigation -->
+  <header class="fixed top-0 left-0 w-full bg-gradient-to-r from-black/90 to-gray-900/90 backdrop-blur-md z-50 py-3">
+    <nav class="container mx-auto px-6 flex items-center justify-between">
+      <a href="#" class="text-xl font-bold text-blue-500 text-glow-blue">NMNV</a>
+      <button class="nav-toggle md:hidden focus:outline-none" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-menu hidden md:flex items-center">
+        <li><a href="#home" class="text-color-mix">Home</a></li>
+        <li><a href="#music" class="text-color-mix">Music</a></li>
+        <li><a href="#about" class="text-color-mix">About</a></li>
+        <li><a href="#videos" class="text-color-mix">Videos</a></li>
+        <li><a href="#appointments" class="text-color-mix">Appointments</a></li>
+        <li><a href="#connect" class="text-color-mix">Connect</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="section min-h-screen flex items-center justify-center bg-transparent hero-section">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-5xl md:text-7xl font-extrabold text-blue-500 text-glow-blue mb-4 animate-fade-in">Mighty Puppi</h1>
+      <p class="text-xl md:text-2xl text-color-mix mb-8 max-w-3xl mx-auto">A <span id="puppi-age"></span>-Year-Old Prodigy Born to Redefine Music with Unstoppable Beats and Raw Talent</p>
+      <a href="#music" class="action-btn inline-block text-white px-8 py-3 rounded-full transition text-glow-red">Stream Now</a>
+    </div>
+  </section>
+
+  <!-- Music Section -->
+  <section id="music" class="section bg-transparent">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">Latest Tracks</h2>
+      <p class="text-lg text-color-mix text-center mb-10 max-w-3xl mx-auto">At just <span id="puppi-age-music"></span>, Mighty Puppi is dropping tracks that resonate with a generation. His music is a bold mix of Afrobeat, trap, and pop, delivering high-energy beats and lyrics that speak to the dreams and struggles of youth.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="card">
+          <div class="album-art-container">
+            <img src="money.jpg" alt="Track 1">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-color-mix mb-2">MONEY</h3>
+            <p class="text-gray-300 mb-4">A fiery track capturing the hustle of late nights, with pulsating beats and lyrics about chasing dreams under the stars. This is Puppi’s breakout hit, already at 100K streams on Audiomack.</p>
+            <a href="https://audiomack.com/mightypuppi/song/money" target="_blank" class="audiomack-link">Listen on Audiomack</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="album-art-container">
+            <img src="jayelo.jpg" alt="Track 2">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-color-mix mb-2">JAYELO</h3>
+            <p class="text-gray-300 mb-4">A smooth yet electrifying track blending dreamy melodies with a hard-hitting beat. It’s the perfect anthem for late-night drives, showcasing Puppi’s knack for emotional depth.</p>
+            <a href="https://audiomack.com/mightypuppi/song/jayelo" target="_blank" class="audiomack-link">Listen on Audiomack</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="album-art-container">
+            <img src="history.jpg" alt="Track 3">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-color-mix mb-2">HISTORY</h3>
+            <p class="text-gray-300 mb-4">An uplifting song about new beginnings, layering dreamy synths over a driving beat. It’s Puppi’s way of saying the future is bright—and he’s just getting started.</p>
+            <a href="https://audiomack.com/mightypuppi/song/history" target="_blank" class="audiomack-link">Listen on Audiomack</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="section bg-transparent">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">The Prodigy: Mighty Puppi</h2>
+      <div class="flex flex-col md:flex-row items-center gap-12">
+        <div class="md:w-1/2">
+          <img src="Mighty.jpg" alt="Mighty Puppi" class="rounded-2xl w-full shadow-lg">
+        </div>
+        <div class="md:w-1/2">
+          <div class="about-story">
+            <p class="text-color-mix">Born <span class="highlight">Bamus Akorede David</span> on April 5, <span id="birth-year"></span>, in the vibrant heart of Lagos, Nigeria, Mighty Puppi is a <span id="puppi-age-about"></span>-year-old musical prodigy who’s already making waves. Raised in a bustling neighborhood, he grew up immersed in the rhythms of Afrobeat, fuji music, and the soulful hymns of his local church choir.</p>
+            <p class="text-color-mix">At just 12, Puppi’s journey kicked off with a borrowed phone and a cracked version of <span class="highlight">FL Studio</span>. By 14, he’d mastered production, lyric writing, and mixing—all self-taught through YouTube tutorials and relentless grit. His big break came in early <span id="break-year"></span>, when a freestyle on TikTok exploded with <span class="highlight">500K views</span> overnight.</p>
+            <p class="text-color-mix">Now, at <span id="puppi-age-about-2"></span>, Puppi is crafting his debut EP, <i><span class="highlight">Puppy Unleashed</span></i>, set to drop later this year. It’s a bold fusion of Afrobeat, trap, and pop, packed with raw lyrics about youth, hustle, and hope, drawing inspiration from icons like Burna Boy and Travis Scott.</p>
+            <p class="text-color-mix">Beyond music, Puppi’s a lively teen with a passion for <span class="highlight">blue sneakers</span>, red caps, and sketching album art. “I want my music to make you feel like you’re flying,” he says. With <span class="highlight">75K streams</span> on Audiomack and a growing fanbase called “Ignis Vigilia” Mighty Puppi is destined for greatness.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ <!-- Videos Section -->
+ <section id="videos" class="section bg-transparent">
+  <div class="container mx-auto px-4">
+    <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">Visual Vibes</h2>
+    <p class="text-lg text-color-mix text-center mb-10 max-w-3xl mx-auto">Mighty Puppi’s music videos are a window into his world—gritty, colorful, and full of energy. Shot with a DIY spirit by his crew of friends, these visuals bring his tracks to life with neon aesthetics and raw emotion.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div class="card relative pb-[56.25%] h-0 overflow-hidden">
+        <iframe loading="lazy" class="absolute top-0 left-0 w-full h-full rounded-t-xl" src="https://www.youtube.com/embed/lbU1pr6l4zw" title="Freestyle Level Video" frameborder="0" allowfullscreen></iframe>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-color-mix mb-2">Freestyle Level</h3>
+          <p class="text-gray-300">Filmed in the backstreets of Lagos, this video follows Puppi and his crew vibing under neon signs. Fast cuts, blue-red lighting, and raw energy make it a fan favorite with 200K views on YouTube.</p>
+        </div>
+      </div>
+      <div class="card relative pb-[56.25%] h-0 overflow-hidden">
+        <iframe loading="lazy" class="absolute top-0 left-0 w-full h-full rounded-t-xl" src="https://www.youtube.com/embed/LbOIgpVbiHM" title="KASALA by Mighty Puppi Video" frameborder="0" allowfullscreen></iframe>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-color-mix mb-2">KASALA by Mighty Puppi</h3>
+          <p class="text-gray-300">A surreal journey through a desert under a glowing red moon, this video blends cinematic shots with Puppi’s infectious energy, showing his knack for storytelling through visuals.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- Appointments Section -->
+  <section id="appointments" class="section bg-transparent">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">Collaborate with Mighty Puppi</h2>
+      <p class="text-lg text-color-mix text-center mb-10 max-w-3xl mx-auto">At <span id="puppi-age-appointments"></span>, Puppi is already a creative force, and he’s open to collaborations that push boundaries. Contact his manager directly via WhatsApp to schedule a session and create something legendary.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="card p-6 text-center">
+          <h3 class="text-xl font-semibold text-color-mix mb-2">Studio Collab</h3>
+          <p class="text-gray-300 mb-4">Jump into the studio with Puppi to record a track or brainstorm a new banger. His youthful energy and creative ideas are perfect for making something fresh.</p>
+          <button onclick="sendWhatsAppMessage('Studio Collab', 'I’d like to book a studio collab session with Mighty Puppi. Please provide available dates and details.')" class="action-btn inline-block text-white px-6 py-3 rounded-full transition">Book Now</button>
+        </div>
+        <div class="card p-6 text-center">
+          <h3 class="text-xl font-semibold text-color-mix mb-2">Feature Request</h3>
+          <p class="text-gray-300 mb-4">Want Puppi’s voice on your track? Schedule a slot to discuss a feature—his unique sound can take your project to the next level.</p>
+          <button onclick="sendWhatsAppMessage('Feature Request', 'I’d like to request a feature with Mighty Puppi for my track. Can we discuss details and availability?')" class="action-btn inline-block text-white px-6 py-3 rounded-full transition">Book Now</button>
+        </div>
+        <div class="card p-6 text-center">
+          <h3 class="text-xl font-semibold text-color-mix mb-2">Live Chat</h3>
+          <p class="text-gray-300 mb-4">Join Puppi for a virtual Q&A or casual chat about music, life, and dreams. Limited slots for fans and creators—don’t miss out!</p>
+          <button onclick="sendWhatsAppMessage('Live Chat', 'I’d like to schedule a live chat with Mighty Puppi. Please share available slots and details.')" class="action-btn inline-block text-white px-6 py-3 rounded-full transition">Book Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Connect Section -->
+  <section id="connect" class="section bg-transparent">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">Join the Pack</h2>
+      <p class="text-lg text-color-mix text-center mb-10 max-w-3xl mx-auto">Mighty Puppi’s journey is just beginning, and he wants you along for the ride. Follow him on socials to catch new drops, behind-the-scenes moments, and join a community that’s all about the vibe.</p>
+      <div class="flex flex-wrap justify-center gap-10">
+        <a href="http://wa.me/2347063387426" target="_blank" class="social-icon text-white text-3xl" aria-label="WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://www.tiktok.com/@mightypuppi?_t=ZM-8vY6bNDrRKw&_r=1" target="_blank" class="social-icon text-white text-3xl" aria-label="TikTok">
+          <i class="fab fa-tiktok"></i>
+        </a>
+        <a href="https://www.instagram.com/mightypuppi2025?igsh=eDEwM3kwOTdqMWc3&utm_source=qr" target="_blank" class="social-icon text-white text-3xl" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://twitter.com" target="_blank" class="social-icon text-white text-3xl" aria-label="Twitter">
+          <i class="fab fa-x-twitter"></i>
+        </a>
+        <a href="https://telegram.org" target="_blank" class="social-icon text-white text-3xl" aria-label="Telegram">
+          <i class="fab fa-telegram-plane"></i>
+        </a>
+        <a href="https://www.facebook.com/share/1ATLjmdjCc/?mibextid=wwXIfr" target="_blank" class="social-icon text-white text-3xl" aria-label="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://audiomack.com/mightypuppi" target="_blank" class="social-icon music-icon text-white text-3xl" aria-label="Audiomack">
+          <i class="fas fa-music"></i>
+        </a>
+        <a href="https://open.spotify.com" target="_blank" class="social-icon music-icon text-white text-3xl" aria-label="Spotify">
+          <i class="fab fa-spotify"></i>
+        </a>
+        <a href="http://www.youtube.com/@BadmusKorede-th8xu" target="_blank" class="social-icon text-white text-3xl" aria-label="YouTube">
+          <i class="fab fa-youtube"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Time Zone Section -->
+  <section id="timezone" class="section bg-transparent">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold text-blue-500 text-glow-blue mb-12 text-center">Global Vibes</h2>
+      <p class="text-lg text-color-mix text-center mb-10 max-w-3xl mx-auto">Mighty Puppi’s music transcends borders. Check the current time in key cities to catch his next global drop!</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="timezone-card">
+          <h3>Lagos</h3>
+          <p id="time-lagos"></p>
+        </div>
+        <div class="timezone-card">
+          <h3>New York</h3>
+          <p id="time-new-york"></p>
+        </div>
+        <div class="timezone-card">
+          <h3>London</h3>
+          <p id="time-london"></p>
+        </div>
+        <div class="timezone-card">
+          <h3>Tokyo</h3>
+          <p id="time-tokyo"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© <span id="footer-year"></span> NMNV. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Navigation Toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    });
+
+    // Smooth Scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+        navToggle.classList.remove('active');
+        navMenu.classList.remove('active');
+      });
+    });
+
+    // Dynamic Age and Year Calculation
+    function updateAgeAndYears() {
+      const birthDate = new Date('2009-04-05');
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      const currentYear = today.getFullYear();
+      const birthYear = birthDate.getFullYear();
+      const breakYear = currentYear;
+
+      const ageElements = [
+        document.getElementById('puppi-age'),
+        document.getElementById('puppi-age-music'),
+        document.getElementById('puppi-age-about'),
+        document.getElementById('puppi-age-about-2'),
+        document.getElementById('puppi-age-appointments')
+      ];
+
+      ageElements.forEach(element => {
+        if (element) element.textContent = age;
+      });
+
+      const birthYearElement = document.getElementById('birth-year');
+      if (birthYearElement) birthYearElement.textContent = birthYear;
+
+      const breakYearElement = document.getElementById('break-year');
+      if (breakYearElement) breakYearElement.textContent = breakYear;
+
+      const yearElement = document.getElementById('footer-year');
+      if (yearElement) yearElement.textContent = currentYear;
+    }
+
+    updateAgeAndYears();
+
+   
+     
+    // WhatsApp Messaging Function
+    function sendWhatsAppMessage(type, message) {
+      const managerNumber = '+2349129793511';
+      const encodedMessage = encodeURIComponent(`New Appointment Request: ${type}\n${message}\nFrom: [User Name]`);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${managerNumber}&text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
+      alert(`Appointment request for "${type}" has been sent to Mighty Puppi's manager via WhatsApp. They'll get back to you soon!`);
+    }
+    // Time Zone Display
+    function updateTimeZones() {
+      const now = new Date();
+      const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+      const timeLagos = now.toLocaleTimeString('en-US', { timeZone: 'Africa/Lagos', ...timeOptions });
+      const timeNewYork = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', ...timeOptions });
+      const timeLondon = now.toLocaleTimeString('en-US', { timeZone: 'Europe/London', ...timeOptions });
+      const timeTokyo = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Tokyo', ...timeOptions });
+
+      document.getElementById('time-lagos').textContent = timeLagos;
+      document.getElementById('time-new-york').textContent = timeNewYork;
+      document.getElementById('time-london').textContent = timeLondon;
+      document.getElementById('time-tokyo').textContent = timeTokyo;
+    }
+    updateTimeZones();
+    setInterval(updateTimeZones, 1000);
+
+    // Enhanced Background Animation with Music Symbols
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const text = 'NMNV';
+    const musicSymbols = ['♪', '♫', '♬', '🎵', '🎶'];
+    let particles = [];
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 50;
+        this.vx = (Math.random() - 0.5) * 4;
+        this.vy = -Math.random() * 6 - 4;
+        this.size = Math.random() * 28 + 18;
+        this.opacity = Math.random() * 0.6 + 0.4;
+        this.isMusicSymbol = Math.random() > 0.7;
+        this.text = this.isMusicSymbol
+          ? musicSymbols[Math.floor(Math.random() * musicSymbols.length)]
+          : text[Math.floor(Math.random() * text.length)];
+        this.color = Math.random() > 0.5 ? '#3b82f6' : '#ef4444';
+        this.glow = Math.random() * 15 + 10;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.03;
+        this.wave = Math.random() * Math.PI * 2;
+        this.waveSpeed = Math.random() * 0.05 + 0.02;
+      }
+      update() {
+        this.x += this.vx + Math.sin(this.wave) * 2;
+        this.y += this.vy;
+        this.wave += this.waveSpeed;
+        this.opacity -= 0.0005;
+        this.rotation += this.rotationSpeed;
+        if (this.y < -50 || this.opacity <= 0) {
+          this.reset();
+        }
+      }
+    
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color + `${Math.floor(this.opacity * 255).toString(16).padStart(2, '0')}`;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = this.glow;
+        ctx.font = `${this.size}px Poppins`;
+        ctx.fillText(this.text, 0, 0);
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
+
+    function initParticles() {
+      const particleCount = Math.min(100, Math.floor(window.innerWidth / 8));
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+    initParticles();
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // GSAP Animations
+    document.addEventListener('DOMContentLoaded', () => {
+      gsap.from('.animate-fade-in', {
+        opacity: 0,
+        y: 60,
+        duration: 1.8,
+        ease: 'power4.out'
+      });
+
+      gsap.utils.toArray('.section').forEach(section => {
+        gsap.from(section.children, {
+          opacity: 0,
+          y: 50,
+          duration: 1.2,
+          stagger: 0.2,
+          ease: 'power4.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%'
+          }
+        });
+      });
+
+      gsap.utils.toArray('.about-story p').forEach((p, i) => {
+        gsap.from(p, {
+          opacity: 0,
+          x: i % 2 === 0 ? -50 : 50,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: p,
+            start: 'top 90%'
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
